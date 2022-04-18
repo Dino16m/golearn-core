@@ -8,7 +8,7 @@ import (
 
 type CORSMiddleware gin.HandlerFunc
 
-func New(cfg config.CORSConfig) CORSMiddleware {
+func NewCORSMiddleware(cfg config.CORSConfig) CORSMiddleware {
 	defaultCfg := cors.DefaultConfig()
 	defaultCfg.AllowHeaders = append(defaultCfg.AllowHeaders, "X-CSRF-TOKEN")
 	validCfg := updateCORSCfg(cfg, defaultCfg)
