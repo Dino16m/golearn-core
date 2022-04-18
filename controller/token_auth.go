@@ -9,7 +9,7 @@ import (
 )
 
 type Authenticator interface {
-	Authenticate(c *gin.Context) (userId interface{}, err errors.ApplicationError)
+	Authenticate(c Validatable) (userId interface{}, err errors.ApplicationError)
 }
 type JWTAuthService interface {
 	GetTokenPair(claim map[string]interface{}) (refreshToken string, authToken string)

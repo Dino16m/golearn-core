@@ -17,6 +17,10 @@ type JWTAuthMiddleware struct {
 	userRepo    UserRepository
 }
 
+func NewJWTAuthMiddleware(authService services.JWTAuthService, userRepo UserRepository) JWTAuthMiddleware {
+	return JWTAuthMiddleware{authAdapter: authService, userRepo: userRepo}
+}
+
 func (m JWTAuthMiddleware) Authorize(c *gin.Context) {
 	authorization, ok := c.Request.Header["Authorization"]
 	if !ok {
