@@ -9,7 +9,7 @@ import (
 )
 
 type UserRepository interface {
-	getAuthUser(claim interface{}) (interface{}, errors.ApplicationError)
+	FindAuthUser(username interface{}) (interface{}, errors.ApplicationError)
 }
 
 type JWTAuthMiddleware struct {
@@ -34,7 +34,7 @@ func (m JWTAuthMiddleware) Authorize(c *gin.Context) {
 		return
 	}
 	uid := claims[config.UserIdClaim]
-	user, err := m.userRepo.getAuthUser(uid)
+	user, err := m.userRepo.FindAuthUser(uid)
 	if err != nil {
 		errorResponse(c, errors.UnauthorizedError("User not found"))
 	}
