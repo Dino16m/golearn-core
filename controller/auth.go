@@ -17,7 +17,7 @@ type PasswordChangeForm struct {
 
 type UserService interface {
 	CreateUser(ctx Validatable) (interface{}, errors.ApplicationError)
-	ChangePassword(user interface{}, password string)
+	ChangePassword(user interface{}, dto PasswordChangeForm) errors.ApplicationError
 }
 
 type AuthController struct {
@@ -54,7 +54,13 @@ func (ctrl AuthController) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	ctrl.userService.ChangePassword(user, dto.NewPassword)
+	err = ctrl.userService.ChangePassword(user, dto)
+	if err != nil {
+		ctrl.ErrorResponse(c, err)
+		return
+	}
+	ctrl.OkResponse(c, AppResponse{})
+
 }
 
 func (ctrl AuthController) RegisterRoutes(router *gin.RouterGroup) {
