@@ -54,10 +54,10 @@ func (a *EventDispatcher) getID() int {
 }
 
 // Dispatch emits an event
-func (a *EventDispatcher) Dispatch(event Event) {
-	listeners := a.listeners[event.name]
+func (a *EventDispatcher) Dispatch(name EventName, data interface{}) {
+	listeners := a.listeners[name]
 	for _, listener := range listeners {
-		listener.Handle(event.data)
+		listener.Handle(data)
 	}
 }
 
