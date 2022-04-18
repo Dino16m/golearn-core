@@ -29,3 +29,7 @@ func UnauthorizedError(message string) AppError {
 func InternalServerError(message string) AppError {
 	return AppError{Code: http.StatusInternalServerError, Message: message}
 }
+
+func ValidationError(message string) AppError {
+	return AppError{Code: 400, Message: message}
+}

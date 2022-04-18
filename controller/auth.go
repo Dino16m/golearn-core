@@ -10,9 +10,14 @@ type Validatable interface {
 	ShouldBind(obj interface{}) error
 }
 
+type PasswordChangeForm struct {
+	OldPassword string `form:"oldPassword" json:"oldPassword" binding:"required"`
+	NewPassword string `form:"newPassword" json:"newPassword" binding:"required"`
+}
+
 type UserService interface {
 	CreateUser(ctx Validatable) (interface{}, errors.ApplicationError)
-	ChangePassword(user interface{}, ctx Validatable)
+	ChangePassword(user interface{}, password string)
 }
 
 type AuthController struct {
@@ -26,22 +31,30 @@ func NewAuthController(userService UserService, dispatcher event.Dispatcher) Aut
 }
 
 func (ctrl AuthController) Signup(c *gin.Context) {
-	userDTO, err := ctrl.userService.CreateUser(c)
+	user, err := ctrl.userService.CreateUser(c)
 	if err != nil {
 		ctrl.ErrorResponse(c, err)
 		return
 	}
-
-	ctrl.OkResponse(c, AppResponse{Data: userDTO})
+	ctrl.dispatcher.Dispatch(event.UserCreated, user)
+	ctrl.OkResponse(c, AppResponse{Data: user})
 }
 
 func (ctrl AuthController) ChangePassword(c *gin.Context) {
 	user, err := ctrl.GetAuthUser(c)
 	if err != nil {
 		ctrl.ErrorResponse(c, err)
+		return
 	}
-	ctrl.dispatcher.Dispatch(event.UserCreated, user)
-	ctrl.userService.ChangePassword(user, c)
+
+	var dto PasswordChangeForm
+	e := c.ShouldBind(&dto)
+	if e != nil {
+		ctrl.ErrorResponse(c, errors.ValidationError(e.Error()))
+		return
+	}
+
+	ctrl.userService.ChangePassword(user, dto.NewPassword)
 }
 
 func (ctrl AuthController) RegisterRoutes(router *gin.RouterGroup) {
