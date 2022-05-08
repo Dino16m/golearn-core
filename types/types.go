@@ -25,3 +25,6 @@ type Logger interface {
 	Info(args ...interface{})
 	Error(args ...interface{})
 }
+
+const RefreshTokenKey = "refresh"
+const AuthTokenKey = "auth"
