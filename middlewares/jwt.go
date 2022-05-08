@@ -1,10 +1,11 @@
 package middlewares
 
 import (
+	"strings"
+
 	"github.com/dino16m/golearn-core/config"
 	"github.com/dino16m/golearn-core/errors"
 	"github.com/dino16m/golearn-core/services"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,8 +28,12 @@ func (m JWTAuthMiddleware) Authorize(c *gin.Context) {
 		errorResponse(c, errors.UnauthorizedError("Unauthorized"))
 		return
 	}
-	token := authorization[len(authorization)-1]
-	claims, err := m.authAdapter.GetClaim(token)
+	header := authorization[len(authorization)-1]
+	token := strings.Split(header, " ")
+	if len(token) < 2 {
+		errorResponse(c, errors.UnauthorizedError(""))
+	}
+	claims, err := m.authAdapter.GetClaim(token[1])
 	if err != nil {
 		errorResponse(c, err)
 		return
@@ -37,6 +42,7 @@ func (m JWTAuthMiddleware) Authorize(c *gin.Context) {
 	user, err := m.userRepo.FindAuthUser(uid)
 	if err != nil {
 		errorResponse(c, errors.UnauthorizedError("User not found"))
+		return
 	}
 
 	userManager := func() interface{} {
@@ -53,4 +59,5 @@ func errorResponse(ctx *gin.Context, err errors.ApplicationError) {
 		"status": false,
 		"error":  message,
 	})
+	ctx.Abort()
 }
