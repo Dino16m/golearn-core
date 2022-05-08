@@ -21,7 +21,7 @@ func NewJWTAuthService(options config.JwtOptions) JWTAuthService {
 
 func (a JWTAuthService) GetRefreshToken(baseClaims JWTClaims) string {
 	baseClaims["iat"] = time.Now().Unix()
-	baseClaims["nbf"] = time.Now()
+	baseClaims["nbf"] = time.Now().Unix()
 	baseClaims["exp"] = time.Now().Add(a.options.MaxRefresh).Unix()
 	baseClaims["use"] = "ref"
 
@@ -34,7 +34,7 @@ func (a JWTAuthService) GetRefreshToken(baseClaims JWTClaims) string {
 func (a JWTAuthService) GetToken(claim JWTClaims) string {
 	claim["exp"] = time.Now().Add(a.options.Timeout).Unix()
 	claim["iat"] = time.Now().Unix()
-	claim["nbf"] = time.Now()
+	claim["nbf"] = time.Now().Unix()
 	claim["use"] = "auth"
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(claim))
