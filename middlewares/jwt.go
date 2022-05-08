@@ -45,11 +45,7 @@ func (m JWTAuthMiddleware) Authorize(c *gin.Context) {
 		return
 	}
 
-	userManager := func() interface{} {
-		return user
-	}
-
-	c.Set(config.AuthUserContextKey, userManager)
+	c.Set(config.AuthUserContextKey, user)
 	c.Next()
 }
 
