@@ -35,7 +35,7 @@ func (m JWTAuthMiddleware) Authorize(c *gin.Context) {
 		errorResponse(c, errors.UnauthorizedError(""))
 	}
 	claims, err := m.authAdapter.GetClaim(token[1])
-	if claims["use"] != types.RefreshTokenKey {
+	if claims["use"] != types.AuthTokenKey {
 		errorResponse(c, errors.UnauthorizedError(""))
 	}
 	if err != nil {
