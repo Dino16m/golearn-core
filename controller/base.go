@@ -29,15 +29,13 @@ type UserManager func() any
 // It returns a nil user and an error if the user does not exist or if
 // no auth manager was registered.
 func (b BaseController) GetAuthUser(c *gin.Context) (interface{}, errors.ApplicationError) {
-	callable, exists := c.Get(config.AuthUserContextKey)
+
+	user, exists := c.Get(config.AuthUserContextKey)
 	if !exists {
 		return nil, errors.UnauthorizedError("User not authenticated")
 	}
-	userManager, ok := callable.(UserManager)
-	if !ok {
-		return nil, errors.AppError{Code: 500, Message: "Internal Server Error"}
-	}
-	return userManager(), nil
+
+	return user, nil
 }
 
 // GetBaseURL return the fully qualified url to the root of the app, from the

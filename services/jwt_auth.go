@@ -6,6 +6,7 @@ import (
 
 	"github.com/dino16m/golearn-core/config"
 	"github.com/dino16m/golearn-core/errors"
+	"github.com/dino16m/golearn-core/types"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -21,8 +22,9 @@ func NewJWTAuthService(options config.JwtOptions) JWTAuthService {
 
 func (a JWTAuthService) GetRefreshToken(baseClaims JWTClaims) string {
 	baseClaims["iat"] = time.Now().Unix()
-	baseClaims["nbf"] = time.Now().Add(a.options.MaxRefresh).Unix()
+	baseClaims["nbf"] = time.Now().Unix()
 	baseClaims["exp"] = time.Now().Add(a.options.MaxRefresh).Unix()
+	baseClaims["use"] = types.RefreshTokenKey
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(baseClaims))
 
@@ -33,7 +35,8 @@ func (a JWTAuthService) GetRefreshToken(baseClaims JWTClaims) string {
 func (a JWTAuthService) GetToken(claim JWTClaims) string {
 	claim["exp"] = time.Now().Add(a.options.Timeout).Unix()
 	claim["iat"] = time.Now().Unix()
-	claim["nbf"] = time.Now().Add(a.options.Timeout).Unix()
+	claim["nbf"] = time.Now().Unix()
+	claim["use"] = types.AuthTokenKey
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(claim))
 
@@ -59,7 +62,7 @@ func (a JWTAuthService) GetClaim(tokenStr string) (map[string]interface{}, error
 		if ok {
 			return nil, appError
 		} else {
-			return nil, errors.InternalServerError("")
+			return nil, errors.InternalServerError(err.Error())
 		}
 	}
 

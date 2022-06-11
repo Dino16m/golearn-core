@@ -5,6 +5,7 @@ import (
 
 	"github.com/dino16m/golearn-core/config"
 	"github.com/dino16m/golearn-core/errors"
+	"github.com/dino16m/golearn-core/types"
 	"github.com/gin-gonic/gin"
 )
 
@@ -45,8 +46,11 @@ func (ctrl JWTAuthController) RefreshToken(c *gin.Context) {
 	if err != nil {
 		ctrl.ErrorResponse(c, err)
 	}
+	if claim["use"] != types.RefreshTokenKey {
+		ctrl.ErrorResponse(c, errors.UnauthorizedError(""))
+	}
 	freshClaim := map[string]interface{}{
-		config.UserIdClaim: claim[config.UserIdClaim],
+		config.UserIdClaim: claim[""],
 	}
 	token := ctrl.authService.GetToken(freshClaim)
 	response := map[string]string{
