@@ -22,7 +22,7 @@ type AppResponse struct {
 	Data interface{}
 }
 
-type UserManager func() interface{}
+type UserManager func() any
 
 // GetAuthUser returns the authenticated user interface and a nil error
 // if such user exists.

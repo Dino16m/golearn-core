@@ -11,6 +11,7 @@ import (
 type Authenticator interface {
 	Authenticate(c Validatable) (userId interface{}, err errors.ApplicationError)
 }
+
 type JWTAuthService interface {
 	GetTokenPair(claim map[string]interface{}) (refreshToken string, authToken string)
 	GetToken(claim map[string]interface{}) string
