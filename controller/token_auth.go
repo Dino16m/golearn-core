@@ -45,9 +45,11 @@ func (ctrl JWTAuthController) RefreshToken(c *gin.Context) {
 	claim, err := ctrl.authService.GetClaim(refresh.token)
 	if err != nil {
 		ctrl.ErrorResponse(c, err)
+		return
 	}
 	if claim["use"] != types.RefreshTokenKey {
-		ctrl.ErrorResponse(c, errors.UnauthorizedError(""))
+		ctrl.ErrorResponse(c, errors.UnauthorizedError("This is not a refresh token"))
+		return
 	}
 	freshClaim := map[string]interface{}{
 		config.UserIdClaim: claim[""],
