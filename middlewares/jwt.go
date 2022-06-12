@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/dino16m/golearn-core/config"
@@ -42,7 +41,6 @@ func (m JWTAuthMiddleware) Authorize(c *gin.Context) {
 		return
 	}
 	if claims["use"] != types.AuthTokenKey {
-		fmt.Println(claims)
 		errorResponse(c, errors.UnauthorizedError(""))
 		return
 	}

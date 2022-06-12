@@ -24,18 +24,26 @@ type AppResponse struct {
 
 type UserManager func() any
 
+func getZero[T any]() T {
+	var result T
+	return result
+}
+func GetUser[T any](c *gin.Context) (T, errors.ApplicationError) {
+
+	user, exists := c.Get(config.AuthUserContextKey)
+	if !exists {
+		return getZero[T](), errors.UnauthorizedError("User not authenticated")
+	}
+
+	return user.(T), nil
+}
+
 // GetAuthUser returns the authenticated user interface and a nil error
 // if such user exists.
 // It returns a nil user and an error if the user does not exist or if
 // no auth manager was registered.
 func (b BaseController) GetAuthUser(c *gin.Context) (interface{}, errors.ApplicationError) {
-
-	user, exists := c.Get(config.AuthUserContextKey)
-	if !exists {
-		return nil, errors.UnauthorizedError("User not authenticated")
-	}
-
-	return user, nil
+	return GetUser[any](c)
 }
 
 // GetBaseURL return the fully qualified url to the root of the app, from the
