@@ -33,15 +33,18 @@ func (m JWTAuthMiddleware) Authorize(c *gin.Context) {
 	token := strings.Split(header, " ")
 	if len(token) < 2 {
 		errorResponse(c, errors.UnauthorizedError(""))
+		return
 	}
 	claims, err := m.authAdapter.GetClaim(token[1])
-	if claims["use"] != types.AuthTokenKey {
-		errorResponse(c, errors.UnauthorizedError(""))
-	}
 	if err != nil {
 		errorResponse(c, err)
 		return
 	}
+	if claims["use"] != types.AuthTokenKey {
+		errorResponse(c, errors.UnauthorizedError(""))
+		return
+	}
+
 	uid := claims[config.UserIdClaim]
 	user, err := m.userRepo.FindAuthUser(uid)
 	if err != nil {

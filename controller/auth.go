@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/dino16m/golearn-core/bus"
 	"github.com/dino16m/golearn-core/errors"
 	"github.com/dino16m/golearn-core/event"
 	"github.com/gin-gonic/gin"
@@ -23,11 +24,11 @@ type UserService interface {
 type AuthController struct {
 	BaseController
 	userService UserService
-	dispatcher  event.Dispatcher
+	bus         *bus.EventBus
 }
 
-func NewAuthController(userService UserService, dispatcher event.Dispatcher) AuthController {
-	return AuthController{userService: userService, dispatcher: dispatcher}
+func NewAuthController(userService UserService, bus *bus.EventBus) AuthController {
+	return AuthController{userService: userService, bus: bus}
 }
 
 func (ctrl AuthController) Signup(c *gin.Context) {
@@ -36,7 +37,7 @@ func (ctrl AuthController) Signup(c *gin.Context) {
 		ctrl.ErrorResponse(c, err)
 		return
 	}
-	ctrl.dispatcher.Dispatch(event.UserCreated, user)
+	ctrl.bus.Dispatch(event.NewUserCreatedEvent(user))
 	ctrl.OkResponse(c, AppResponse{Data: user})
 }
 

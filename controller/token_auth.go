@@ -12,6 +12,7 @@ import (
 type Authenticator interface {
 	Authenticate(c Validatable) (userId interface{}, err errors.ApplicationError)
 }
+
 type JWTAuthService interface {
 	GetTokenPair(claim map[string]interface{}) (refreshToken string, authToken string)
 	GetToken(claim map[string]interface{}) string
@@ -19,7 +20,7 @@ type JWTAuthService interface {
 }
 
 type RefreshTokenPayload struct {
-	token string
+	Token string `form:"token" json:"token" binding:"required"`
 }
 
 type JWTAuthController struct {
@@ -41,13 +42,13 @@ func (ctrl JWTAuthController) RefreshToken(c *gin.Context) {
 		})
 		return
 	}
-	claim, err := ctrl.authService.GetClaim(refresh.token)
+	claim, err := ctrl.authService.GetClaim(refresh.Token)
 	if err != nil {
 		ctrl.ErrorResponse(c, err)
 		return
 	}
 	if claim["use"] != types.RefreshTokenKey {
-		ctrl.ErrorResponse(c, errors.UnauthorizedError(""))
+		ctrl.ErrorResponse(c, errors.UnauthorizedError("This is not a refresh token"))
 		return
 	}
 	freshClaim := map[string]interface{}{

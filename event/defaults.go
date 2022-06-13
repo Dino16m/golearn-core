@@ -1,7 +1,16 @@
 package event
 
-const (
-	// expects map[string]interface{} with keys firstName, lastName, email,
-	// and id which should have an int value
-	UserCreated = EventName("usercreated")
-)
+import "github.com/dino16m/golearn-core/bus"
+
+type UserCreated struct {
+	bus.BaseEvent
+}
+
+func NewUserCreatedEvent(payload any) UserCreated {
+	return UserCreated{
+		bus.BaseEvent{
+			Payload: payload,
+			Name:    "usercreated",
+		},
+	}
+}
