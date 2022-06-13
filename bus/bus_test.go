@@ -1,6 +1,7 @@
 package bus
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -24,7 +25,6 @@ func getEvent() DummyEvent {
 	return DummyEvent{
 		BaseEvent{
 			Payload: "hello",
-			Name:    "Dummy",
 		},
 	}
 }
@@ -41,7 +41,8 @@ func (s *BusTest) TestRemoveListeners() {
 	event := getEvent()
 	s.bus.AddListener(event, listener)
 	s.bus.RemoveListener(event, listener)
-	s.Assert().Empty(s.bus.listeners[event.ID()])
+	eventId := reflect.TypeOf(event).Name()
+	s.Assert().Empty(s.bus.listeners[eventId])
 }
 
 func (s *BusTest) TestDispatchSync() {

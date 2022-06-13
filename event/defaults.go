@@ -10,7 +10,6 @@ func NewUserCreatedEvent(payload any) UserCreated {
 	return UserCreated{
 		bus.BaseEvent{
 			Payload: payload,
-			Name:    "usercreated",
 		},
 	}
 }

@@ -16,7 +16,7 @@ func NewEventBus() *EventBus {
 }
 
 func (bus *EventBus) Dispatch(event Event) {
-	listeners := bus.listeners[event.ID()]
+	listeners := bus.listeners[reflect.TypeOf(event).Name()]
 	for _, listener := range listeners {
 		listener.Handle(event)
 	}
@@ -24,10 +24,9 @@ func (bus *EventBus) Dispatch(event Event) {
 
 func (bus *EventBus) DispatchAsync(event Event) {
 
-	listeners := bus.listeners[event.ID()]
+	listeners := bus.listeners[reflect.TypeOf(event).Name()]
 	var wg sync.WaitGroup
 	for _, listener := range listeners {
-		listener := listener.(Listener)
 		wg.Add(1)
 		go func(listener Listener) {
 			listener.Handle(event)
@@ -38,13 +37,16 @@ func (bus *EventBus) DispatchAsync(event Event) {
 
 }
 
+// AddListener will not work if the added event is a pointer.
+// It only works with value types
 func (bus *EventBus) AddListener(event Event, listener Listener) {
-	id := event.ID()
+	id := reflect.TypeOf(event).Name()
+
 	bus.listeners[id] = append(bus.listeners[id], listener)
 }
 
 func (bus *EventBus) RemoveListener(event Event, listener Listener) {
-	eventId := event.ID()
+	eventId := reflect.TypeOf(event).Name()
 	listeners := bus.listeners[eventId]
 	match := -1
 	for index, existingListener := range listeners {
