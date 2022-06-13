@@ -1,15 +1,9 @@
 package event
 
-import "github.com/dino16m/golearn-core/bus"
-
 type UserCreated struct {
-	bus.BaseEvent
+	Payload any
 }
 
 func NewUserCreatedEvent(payload any) UserCreated {
-	return UserCreated{
-		bus.BaseEvent{
-			Payload: payload,
-		},
-	}
+	return UserCreated{Payload: payload}
 }

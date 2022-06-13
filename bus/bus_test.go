@@ -9,7 +9,7 @@ import (
 )
 
 type DummyEvent struct {
-	BaseEvent
+	Payload any
 }
 
 type BusTest struct {
@@ -22,11 +22,7 @@ func (s *BusTest) SetupTest() {
 }
 
 func getEvent() DummyEvent {
-	return DummyEvent{
-		BaseEvent{
-			Payload: "hello",
-		},
-	}
+	return DummyEvent{}
 }
 
 func (s *BusTest) TestAddListeners() {
