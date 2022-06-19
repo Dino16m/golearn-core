@@ -27,7 +27,6 @@ func (bus *EventBus) DispatchAsync(event Event) {
 	listeners := bus.listeners[event.ID()]
 	var wg sync.WaitGroup
 	for _, listener := range listeners {
-		listener := listener.(Listener)
 		wg.Add(1)
 		go func(listener Listener) {
 			listener.Handle(event)
