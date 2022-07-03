@@ -24,6 +24,10 @@ type AppResponse struct {
 
 type UserManager func() any
 
+type Renderable interface {
+	Render() map[string]interface{}
+}
+
 func getZero[T any]() T {
 	var result T
 	return result
@@ -68,8 +72,17 @@ func (b BaseController) OkResponse(ctx *gin.Context, res AppResponse) {
 	if res.Code == 0 {
 		code = http.StatusOK
 	}
-	ctx.JSON(code, gin.H{
-		"status": true,
-		"data":   res.Data,
-	})
+
+	data := res.Data
+	renderable, ok := data.(Renderable)
+	if ok {
+		rendered := renderable.Render()
+		rendered["status"] = true
+		ctx.JSON(code, rendered)
+	} else {
+		ctx.JSON(code, gin.H{
+			"status": true,
+			"data":   res.Data,
+		})
+	}
 }
