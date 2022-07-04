@@ -8,16 +8,65 @@ import (
 	"github.com/dino16m/golearn-core/errors"
 	"github.com/dino16m/golearn-core/types"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 )
 
 type JWTClaims = map[string]interface{}
 
+type RefreshValidator interface {
+	BlackListFamily(family string)
+	InvalidateJTI(jti string)
+	ValidateJTI(family string, jti string) bool
+}
+
 type JWTAuthService struct {
-	options config.JwtOptions
+	options          config.JwtOptions
+	refreshValidator RefreshValidator
+}
+
+type TokenPair struct {
+	Refresh string `json:"refreshToken"`
+	Auth    string `json:"authToken"`
 }
 
 func NewJWTAuthService(options config.JwtOptions) JWTAuthService {
 	return JWTAuthService{options: options}
+}
+
+func (a JWTAuthService) RefreshToken(refreshToken string) (TokenPair, errors.ApplicationError) {
+	claim, err := a.GetClaim(refreshToken)
+
+	if err != nil {
+		return TokenPair{}, err
+	}
+
+	if claim["use"] != types.RefreshTokenKey {
+		return TokenPair{}, errors.UnauthorizedError("This is not a refresh token")
+	}
+
+	jti := claim["jti"].(string)
+
+	family := claim["fam"].(string)
+
+	valid := a.refreshValidator.ValidateJTI(family, jti)
+	if !valid {
+		a.refreshValidator.BlackListFamily(family)
+		return TokenPair{}, errors.UnauthorizedError("Blacklisted token used")
+	}
+
+	a.refreshValidator.InvalidateJTI(jti)
+
+	freshClaim := JWTClaims{
+		config.UserIdClaim: claim[config.UserIdClaim],
+	}
+
+	refresh := a.GetRefreshToken(jwt.MapClaims{"uid": freshClaim[config.UserIdClaim], "fam": family})
+	auth := a.GetToken(claim)
+
+	return TokenPair{
+		Refresh: refresh,
+		Auth:    auth,
+	}, nil
 }
 
 func (a JWTAuthService) GetRefreshToken(baseClaims JWTClaims) string {
@@ -25,6 +74,11 @@ func (a JWTAuthService) GetRefreshToken(baseClaims JWTClaims) string {
 	baseClaims["nbf"] = time.Now().Unix()
 	baseClaims["exp"] = time.Now().Add(a.options.MaxRefresh).Unix()
 	baseClaims["use"] = types.RefreshTokenKey
+	baseClaims["jti"] = getJTI()
+
+	if baseClaims["family"] == nil || baseClaims["family"] == "" {
+		baseClaims["family"] = getJTI()
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(baseClaims))
 
@@ -72,4 +126,9 @@ func (a JWTAuthService) GetClaim(tokenStr string) (map[string]interface{}, error
 		return nil, errors.UnauthorizedError("Invalid token")
 	}
 
+}
+
+func getJTI() string {
+	id := uuid.New()
+	return id.String()
 }

@@ -5,7 +5,7 @@ import (
 
 	"github.com/dino16m/golearn-core/config"
 	"github.com/dino16m/golearn-core/errors"
-	"github.com/dino16m/golearn-core/types"
+	"github.com/dino16m/golearn-core/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,6 +17,7 @@ type JWTAuthService interface {
 	GetTokenPair(claim map[string]interface{}) (refreshToken string, authToken string)
 	GetToken(claim map[string]interface{}) string
 	GetClaim(tokenStr string) (map[string]interface{}, errors.ApplicationError)
+	RefreshToken(refreshToken string) (services.TokenPair, errors.ApplicationError)
 }
 
 type RefreshTokenPayload struct {
@@ -42,23 +43,13 @@ func (ctrl JWTAuthController) RefreshToken(c *gin.Context) {
 		})
 		return
 	}
-	claim, err := ctrl.authService.GetClaim(refresh.Token)
+
+	pair, err := ctrl.authService.RefreshToken(refresh.Token)
 	if err != nil {
 		ctrl.ErrorResponse(c, err)
 		return
 	}
-	if claim["use"] != types.RefreshTokenKey {
-		ctrl.ErrorResponse(c, errors.UnauthorizedError("This is not a refresh token"))
-		return
-	}
-	freshClaim := map[string]interface{}{
-		config.UserIdClaim: claim[""],
-	}
-	token := ctrl.authService.GetToken(freshClaim)
-	response := map[string]string{
-		"token": token,
-	}
-	ctrl.OkResponse(c, AppResponse{Data: response})
+	ctrl.OkResponse(c, AppResponse{Data: pair})
 }
 
 func (ctrl JWTAuthController) GetTokenPair(c *gin.Context) {
