@@ -76,8 +76,8 @@ func (a JWTAuthService) GetRefreshToken(baseClaims JWTClaims) string {
 	baseClaims["use"] = types.RefreshTokenKey
 	baseClaims["jti"] = getJTI()
 
-	if baseClaims["family"] == nil || baseClaims["family"] == "" {
-		baseClaims["family"] = getJTI()
+	if baseClaims["fam"] == nil || baseClaims["fam"] == "" {
+		baseClaims["fam"] = getJTI()
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(baseClaims))
