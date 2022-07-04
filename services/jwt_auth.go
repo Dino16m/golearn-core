@@ -29,8 +29,8 @@ type TokenPair struct {
 	Auth    string `json:"authToken"`
 }
 
-func NewJWTAuthService(options config.JwtOptions) JWTAuthService {
-	return JWTAuthService{options: options}
+func NewJWTAuthService(options config.JwtOptions, refreshValidator RefreshValidator) JWTAuthService {
+	return JWTAuthService{options: options, refreshValidator: refreshValidator}
 }
 
 func (a JWTAuthService) RefreshToken(refreshToken string) (TokenPair, errors.ApplicationError) {
