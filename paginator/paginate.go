@@ -1,7 +1,6 @@
 package paginator
 
 import (
-	"errors"
 	"math"
 	"strconv"
 
@@ -58,12 +57,12 @@ func Paginate[T any](pageInfo PageInfo, db *gorm.DB) (Paginated[T], error) {
 	var count int64
 	res := db.Count(&count)
 
-	if res.Error != nil && errors.Is(res.Error, gorm.ErrRecordNotFound) {
+	if res.Error != nil {
 		return Paginated[T]{}, res.Error
 	}
 	res = db.Offset(offset).Limit(pageInfo.Limit).Find(&empty)
 
-	if res.Error != nil && errors.Is(res.Error, gorm.ErrRecordNotFound) {
+	if res.Error != nil {
 		return Paginated[T]{}, res.Error
 	}
 
