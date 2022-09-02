@@ -116,7 +116,7 @@ func (a JWTAuthService) GetClaim(tokenStr string) (map[string]interface{}, error
 		if ok {
 			return nil, appError
 		} else {
-			return nil, errors.InternalServerError(err.Error())
+			return nil, errors.UnauthorizedError(err.Error())
 		}
 	}
 
