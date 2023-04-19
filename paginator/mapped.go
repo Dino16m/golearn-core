@@ -28,7 +28,7 @@ func MappedPaginate[T any, Out any](pageInfo PageInfo, db *gorm.DB, mapper Build
 }
 
 func mapData[In any, Out any](data []In, mapper Builder[In, Out]) []Out {
-	var output []Out
+	output := []Out{}
 	for _, value := range data {
 		mappedValue := mapper(value)
 		output = append(output, mappedValue)
